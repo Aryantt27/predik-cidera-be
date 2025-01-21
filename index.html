@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediksi Cedera Pemain</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Prediksi Cedera Pemain</h1>
+        <p>Masukkan data pemain untuk memprediksi risiko cedera.</p>
+    </header>
+    <main>
+        <section>
+            <form id="predictionForm" method="post">
+                <label for="age">Usia Pemain (Player_Age):</label>
+                <input type="number" step="0.1" id="age" name="player_age" required>
+
+                <label for="weight">Berat Pemain (Player_Weight):</label>
+                <input type="number" step="0.1" id="weight" name="player_weight" required>
+
+                <label for="height">Tinggi Pemain (Player_Height):</label>
+                <input type="number" step="0.1" id="height" name="player_height" required>
+
+                <label for="injuries">Jumlah Cedera Sebelumnya (Previous_Injuries):</label>
+                <input type="number" id="injuries" name="previous_injuries" required>
+
+                <label for="intensity">Intensitas Latihan (Training_Intensity):</label>
+                <input type="number" step="0.1" id="intensity" name="training_intensity" required>
+
+                <label for="recovery">Waktu Pemulihan (Recovery_Time):</label>
+                <input type="number" step="0.1" id="recovery" name="recovery_time" required>
+
+                <button type="submit">Prediksi Cedera</button>
+            </form>
+
+            <div id="result"></div>
+        </section>
+    </main>
+
+    <script>
+        const form = document.getElementById('predictionForm');
+        const resultDiv = document.getElementById('result');
+
+        // Set URL backend secara dinamis
+        form.action = window.location.origin + "/predict";
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        player_age: parseFloat(data.player_age),
+                        player_weight: parseFloat(data.player_weight),
+                        player_height: parseFloat(data.player_height),
+                        previous_injuries: parseInt(data.previous_injuries),
+                        training_intensity: parseFloat(data.training_intensity),
+                        recovery_time: parseFloat(data.recovery_time),
+                    }),
+                });
+
+                if (!response.ok) throw new Error(await response.text());
+
+                const result = await response.json();
+                resultDiv.innerHTML = `<p>Hasil Prediksi: ${result.prediction}</p>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
